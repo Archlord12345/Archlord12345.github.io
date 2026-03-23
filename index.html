@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ravel Nghomsi · Portfolio Solaire</title>
+  <meta name="description" content="Portfolio de Nghomsi Feukouo Ravel — Développeur Fullstack & Étudiant en Informatique. Découvrez mes projets sous forme de système solaire interactif.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:   #f6bd60;
+      --cyan:   #84dcc6;
+      --blue:   #a9def9;
+      --purple: #e4c1f9;
+      --red:    #f28482;
+      --bg:     #030711;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: #fff;
+      font-family: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    /* ─── Stars ─────────────────────────────────────────── */
+    #stars-canvas {
+      position: fixed; inset: 0;
+      z-index: 0;
+    }
+
+    /* ─── Navigation ─────────────────────────────────────── */
+    #nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 14px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(3,7,17,.75);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(132,220,198,.1);
+    }
+
+    #nav-logo {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: #fff;
+    }
+
+    #nav-logo-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--gold), var(--red));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900; color: #000;
+      flex-shrink: 0;
+    }
+
+    #nav-name {
+      font-weight: 700; font-size: 14px;
+      letter-spacing: .1em; text-transform: uppercase;
+    }
+
+    #nav-right { display: flex; align-items: center; gap: 12px; }
+
+    .nav-link {
+      text-decoration: none;
+      color: rgba(255,255,255,.55);
+      font-size: 11px; font-weight: 700;
+      letter-spacing: .2em; text-transform: uppercase;
+      transition: color .2s;
+    }
+    .nav-link:hover { color: var(--cyan); }
+
+    .nav-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 16px;
+      border: 1px solid rgba(132,220,198,.35);
+      border-radius: 12px;
+      background: rgba(132,220,198,.08);
+      color: var(--cyan);
+      font-size: 11px; font-weight: 700;
+      text-decoration: none;
+      transition: background .2s;
+    }
+    .nav-btn:hover { background: rgba(132,220,198,.18); }
+
+    /* ─── Solar container ────────────────────────────────── */
+    #solar-container {
+      position: fixed; inset: 0;
+      z-index: 1;
+      pointer-events: none; /* children re-enable as needed */
+    }
+
+    #orbits-svg {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    /* ─── Profile photo ──────────────────────────────────── */
+    #profile-photo {
+      position: absolute;
+      border-radius: 50%;
+      border: 3px solid var(--gold);
+      box-shadow: 0 0 18px rgba(246,189,96,.55), 0 0 40px rgba(246,189,96,.2);
+      object-fit: cover;
+      z-index: 10;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: box-shadow .3s, filter .3s;
+    }
+    #profile-photo:hover {
+      box-shadow: 0 0 28px rgba(246,189,96,.8), 0 0 60px rgba(246,189,96,.35);
+      filter: brightness(1.08);
+    }
+
+    /* ─── Sun ─────────────────────────────────────────────── */
+    #sun {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 38%,
+        #fff9e6 0%,
+        #f6d370 30%,
+        #e8840b 68%,
+        #a84e00 100%);
+      box-shadow:
+        0 0 50px rgba(246,189,96,.85),
+        0 0 100px rgba(246,189,96,.5),
+        0 0 160px rgba(246,189,96,.25);
+      z-index: 5;
+      pointer-events: none;
+      animation: sun-breathe 3.5s ease-in-out infinite;
+    }
+    @keyframes sun-breathe {
+      0%,100% { box-shadow: 0 0 50px rgba(246,189,96,.85), 0 0 100px rgba(246,189,96,.5), 0 0 160px rgba(246,189,96,.25); }
+      50%      { box-shadow: 0 0 65px rgba(246,189,96,.95), 0 0 130px rgba(246,189,96,.6), 0 0 200px rgba(246,189,96,.35); }
+    }
+
+    #sun-label {
+      position: absolute;
+      color: var(--gold);
+      font-weight: 900; font-size: 13px;
+      letter-spacing: .35em; text-transform: uppercase;
+      text-shadow: 0 0 12px rgba(246,189,96,.8);
+      z-index: 10;
+      white-space: nowrap;
+      pointer-events: none;
+      transform: translateX(-50%);
+    }
+
+    /* ─── Planets ─────────────────────────────────────────── */
+    .planet {
+      position: absolute;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 8;
+      pointer-events: auto;
+      transform: translate(-50%, -50%);
+      transition: transform .25s, box-shadow .25s;
+    }
+    .planet:hover { transform: translate(-50%, -50%) scale(1.4); }
+
+    .planet-label {
+      position: absolute;
+      bottom: calc(100% + 7px);
+      left: 50%; transform: translateX(-50%);
+      white-space: nowrap;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: .15em; text-transform: uppercase;
+      background: rgba(0,0,0,.6);
+      padding: 3px 8px; border-radius: 6px;
+      backdrop-filter: blur(4px);
+      color: #fff;
+      pointer-events: none;
+      opacity: 0; transition: opacity .2s;
+    }
+    .planet:hover .planet-label { opacity: 1; }
+
+    /* ─── Info Panel ──────────────────────────────────────── */
+    #info-panel {
+      position: fixed; top: 0; right: 0;
+      width: min(440px, 100vw);
+      height: 100%;
+      background: rgba(4,8,24,.96);
+      backdrop-filter: blur(30px);
+      border-left: 1px solid rgba(255,255,255,.07);
+      z-index: 200;
+      padding: 76px 36px 36px;
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .4s cubic-bezier(.4,0,.2,1);
+      pointer-events: auto;
+    }
+    #info-panel.open { transform: translateX(0); }
+
+    #panel-close {
+      position: absolute; top: 20px; right: 20px;
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.05);
+      color: #fff; font-size: 22px; line-height: 1;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    #panel-close:hover { background: rgba(255,255,255,.12); }
+
+    #panel-color-block {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+      transform: rotate(12deg);
+      flex-shrink: 0;
+    }
+
+    #panel-title {
+      font-size: clamp(20px, 4vw, 28px);
+      font-weight: 900;
+      letter-spacing: -.01em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    #panel-badge {
+      display: inline-flex; align-items: center;
+      gap: 5px; padding: 3px 10px;
+      border-radius: 8px;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase;
+      margin-bottom: 18px; align-self: flex-start;
+    }
+
+    #panel-description {
+      color: rgba(255,255,255,.58);
+      font-size: 14px; line-height: 1.75;
+      margin-bottom: 28px;
+      flex-shrink: 0;
+    }
+
+    #panel-tech-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: .2em; text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 10px;
+    }
+
+    #panel-tech {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-bottom: auto; padding-bottom: 32px;
+    }
+
+    .tech-tag {
+      padding: 5px 13px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 9px;
+      font-size: 11px; font-weight: 700;
+      color: #fff;
+    }
+
+    #panel-actions { display: flex; flex-direction: column; gap: 10px; }
+
+    .panel-btn {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 13px; font-weight: 700;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .panel-btn-primary  { background: #fff; color: #000; }
+    .panel-btn-primary:hover  { background: #e0e0e0; }
+    .panel-btn-secondary {
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      color: #fff;
+    }
+    .panel-btn-secondary:hover { background: rgba(255,255,255,.1); }
+
+    /* ─── Hero text ───────────────────────────────────────── */
+    #hero {
+      position: fixed; left: 40px; bottom: 90px;
+      z-index: 20; max-width: 360px;
+      pointer-events: none;
+    }
+    #hero-sub {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: .3em; text-transform: uppercase;
+      color: var(--cyan); margin-bottom: 10px;
+    }
+    #hero-title {
+      font-size: clamp(24px, 3vw, 44px);
+      font-weight: 900; line-height: 1.1;
+      letter-spacing: -.02em; text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    #hero-name {
+      background: linear-gradient(90deg, var(--gold), var(--blue), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ─── Social links ────────────────────────────────────── */
+    #social {
+      position: fixed; left: 40px; bottom: 28px;
+      z-index: 20; display: flex; gap: 10px;
+      pointer-events: auto;
+    }
+    .social-btn {
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; text-decoration: none;
+      font-weight: 700; font-size: 13px;
+      transition: all .2s;
+    }
+    .social-btn:hover {
+      background: rgba(132,220,198,.1);
+      border-color: rgba(132,220,198,.4);
+      color: var(--cyan);
+    }
+
+    /* ─── Hint ────────────────────────────────────────────── */
+    #hint {
+      position: fixed; right: 40px; bottom: 28px;
+      z-index: 20;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: .15em; text-transform: uppercase;
+      color: rgba(255,255,255,.28);
+      pointer-events: none;
+      animation: hint-pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes hint-pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: .4; }
+    }
+
+    /* ─── Overlay backdrop (close panel) ─────────────────── */
+    #backdrop {
+      position: fixed; inset: 0;
+      z-index: 150;
+      display: none;
+    }
+    #backdrop.show { display: block; }
+  </style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<!-- Navigation -->
+<nav id="nav">
+  <a id="nav-logo" href="#">
+    <div id="nav-logo-icon">R</div>
+    <span id="nav-name">Nghomsi Feukouo Ravel</span>
+  </a>
+  <div id="nav-right">
+    <a href="mailto:contact.ravel.dev@gmail.com" class="nav-link">Contact</a>
+    <a href="https://github.com/Archlord12345" target="_blank" rel="noopener noreferrer" class="nav-btn">
+      &#9733; GitHub
+    </a>
+  </div>
+</nav>
+
+<!-- Solar system layer -->
+<div id="solar-container">
+  <svg id="orbits-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  <img id="profile-photo"
+       src="https://avatars.githubusercontent.com/u/237933821?v=4"
+       alt="Ravel Nghomsi">
+  <div id="sun"></div>
+  <div id="sun-label">RAVEL</div>
+</div>
+
+<!-- Hero -->
+<div id="hero">
+  <p id="hero-sub">Étudiant en Informatique &amp; Développeur Fullstack</p>
+  <h1 id="hero-title">
+    NGHOMSI<br>
+    <span id="hero-name">RAVEL</span>
+  </h1>
+</div>
+
+<!-- Social -->
+<div id="social">
+  <a href="https://github.com/Archlord12345"
+     target="_blank" rel="noopener noreferrer"
+     class="social-btn" title="GitHub">GH</a>
+  <a href="https://www.linkedin.com/in/archlord12345/"
+     target="_blank" rel="noopener noreferrer"
+     class="social-btn" title="LinkedIn">in</a>
+  <a href="mailto:contact.ravel.dev@gmail.com"
+     class="social-btn" title="Email">✉</a>
+</div>
+
+<!-- Hint -->
+<div id="hint">Cliquer sur une planète ✦</div>
+
+<!-- Backdrop to close panel -->
+<div id="backdrop" onclick="closePanel()"></div>
+
+<!-- Project Info Panel -->
+<div id="info-panel">
+  <button id="panel-close" onclick="closePanel()" aria-label="Fermer">&#x2715;</button>
+  <div id="panel-color-block"></div>
+  <h2 id="panel-title"></h2>
+  <div id="panel-badge"></div>
+  <p id="panel-description"></p>
+  <div id="panel-tech-label">Technologies clés</div>
+  <div id="panel-tech"></div>
+  <div id="panel-actions">
+    <a id="panel-link" href="#" target="_blank" rel="noopener noreferrer"
+       class="panel-btn panel-btn-primary">
+      &#x1F680; Voir le projet
+    </a>
+    <a id="panel-github" href="#" target="_blank" rel="noopener noreferrer"
+       class="panel-btn panel-btn-secondary">
+      &lt;/&gt; Code Source
+    </a>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* =========================================================
+   PROJECTS DATA
+   ========================================================= */
+const PROJECTS = [
+  {
+    id: 1,
+    name: 'PROJET-WEBTOON',
+    description: 'Application web de création de webtoons permettant de générer des planches, gérer des scènes et composer des histoires visuelles de manière intuitive.',
+    tech: ['JavaScript', 'HTML5', 'CSS3'],
+    color: '#ff6b35',
+    baseOrbit: 130,
+    planetSize: 20,
+    speed: 0.9,
+    initialAngle: 0,
+    link: 'https://archlord12345.github.io/PROJET-WEBTOON/',
+    github: 'https://github.com/Archlord12345/PROJET-WEBTOON',
+    badge: 'GitHub Pages',
+    badgeBg: 'rgba(33,150,243,.18)',
+    badgeColor: '#64b5f6',
+  },
+  {
+    id: 2,
+    name: 'KERNEL_CHAT',
+    description: 'Application de chat en temps réel avec automatisation intelligente via n8n, intégration Firebase et interface React moderne pour la collaboration.',
+    tech: ['React', 'Firebase', 'Node.js', 'n8n'],
+    color: '#f6bd60',
+    baseOrbit: 210,
+    planetSize: 24,
+    speed: 0.55,
+    initialAngle: 1.26,
+    link: 'https://kernel-chat.vercel.app',
+    github: 'https://github.com/Archlord12345/KERNEL_CHAT',
+    badge: 'Vercel',
+    badgeBg: 'rgba(255,255,255,.07)',
+    badgeColor: 'rgba(255,255,255,.8)',
+  },
+  {
+    id: 3,
+    name: 'SOLAR PORTFOLIO',
+    description: 'Portfolio 3D immersif créé avec Three.js et React Three Fiber, présentant les projets sous forme de système solaire interactif avec orbites animées.',
+    tech: ['Next.js', 'Three.js', 'React Three Fiber', 'TypeScript'],
+    color: '#84dcc6',
+    baseOrbit: 295,
+    planetSize: 22,
+    speed: 0.32,
+    initialAngle: 2.51,
+    link: 'https://rave-solar-system-portfolio.vercel.app',
+    github: 'https://github.com/Archlord12345/rave-solar-system-portfolio',
+    badge: 'Vercel',
+    badgeBg: 'rgba(255,255,255,.07)',
+    badgeColor: 'rgba(255,255,255,.8)',
+  },
+  {
+    id: 4,
+    name: 'PORFOLIO RAVEL',
+    description: "Portfolio personnel fullstack avec React et TypeScript, présentant mes compétences, expériences et projets avec animations CSS avancées.",
+    tech: ['React', 'TypeScript', 'Vite', 'Tailwind CSS'],
+    color: '#a9def9',
+    baseOrbit: 385,
+    planetSize: 18,
+    speed: 0.19,
+    initialAngle: 3.77,
+    link: 'https://porfolioravel.vercel.app',
+    github: 'https://github.com/Archlord12345/porfolioravel',
+    badge: 'Vercel',
+    badgeBg: 'rgba(255,255,255,.07)',
+    badgeColor: 'rgba(255,255,255,.8)',
+  },
+  {
+    id: 5,
+    name: 'PJAVAINTERFACE',
+    description: "Interface interactive pour visualiser et manipuler des structures de données Java. Outil pédagogique conçu pour faciliter l'apprentissage de la POO.",
+    tech: ['TypeScript', 'React', 'Vite'],
+    color: '#e4c1f9',
+    baseOrbit: 475,
+    planetSize: 17,
+    speed: 0.12,
+    initialAngle: 5.03,
+    link: 'https://pjavainterface.vercel.app',
+    github: 'https://github.com/Archlord12345/pjavainterface',
+    badge: 'Vercel',
+    badgeBg: 'rgba(255,255,255,.07)',
+    badgeColor: 'rgba(255,255,255,.8)',
+  },
+];
+
+/* =========================================================
+   STARS
+   ========================================================= */
+const starsCanvas = document.getElementById('stars-canvas');
+const starsCtx = starsCanvas.getContext('2d');
+let stars = [];
+
+function initStars() {
+  starsCanvas.width  = window.innerWidth;
+  starsCanvas.height = window.innerHeight;
+  stars = [];
+  const count = Math.floor((starsCanvas.width * starsCanvas.height) / 3500);
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      x: Math.random() * starsCanvas.width,
+      y: Math.random() * starsCanvas.height,
+      r: Math.random() * 1.4 + 0.2,
+      opacity: Math.random() * 0.7 + 0.2,
+      twinkleSpeed:  Math.random() * 0.018 + 0.004,
+      twinkleOffset: Math.random() * Math.PI * 2,
+    });
+  }
+}
+
+function drawStars(time) {
+  starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+  stars.forEach(s => {
+    const op = s.opacity * (0.55 + 0.45 * Math.sin(time * s.twinkleSpeed + s.twinkleOffset));
+    starsCtx.beginPath();
+    starsCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    starsCtx.fillStyle = `rgba(255,255,255,${op.toFixed(3)})`;
+    starsCtx.fill();
+  });
+}
+
+/* =========================================================
+   LAYOUT HELPERS
+   ========================================================= */
+const NAV_H  = 66;   // navigation bar height
+const SUN_BASE   = 105; // sun diameter at scale 1
+const PHOTO_BASE =  75; // profile photo diameter at scale 1
+const PHOTO_GAP  =  14; // gap between photo bottom and sun top
+
+let cx = 0, cy = 0, sc = 1;
+
+function recompute() {
+  cx = window.innerWidth  / 2;
+  // Center below the nav bar
+  cy = (window.innerHeight + NAV_H) / 2;
+  // Scale so the largest orbit always fits in the viewport
+  const vmin = Math.min(window.innerWidth, window.innerHeight - NAV_H);
+  sc = Math.max(0.30, Math.min(1.1, vmin / 980));
+}
+
+function sunR()   { return (SUN_BASE   * sc) / 2; }
+function photoD() { return  PHOTO_BASE * sc; }
+function orbitR(base) { return base * sc; }
+function planetD(base) { return base * sc; }
+
+/* =========================================================
+   SUN + PROFILE PHOTO
+   ========================================================= */
+const sunEl    = document.getElementById('sun');
+const labelEl  = document.getElementById('sun-label');
+const photoEl  = document.getElementById('profile-photo');
+
+function layoutSun() {
+  const r = sunR();
+  const d = r * 2;
+  sunEl.style.cssText += `
+    width:${d}px; height:${d}px;
+    left:${cx - r}px; top:${cy - r}px;
+  `;
+  labelEl.style.left = cx + 'px';
+  labelEl.style.top  = (cy + r + 10) + 'px';
+  labelEl.style.fontSize = Math.round(11 * sc) + 'px';
+}
+
+function layoutPhoto() {
+  const d   = photoD();
+  const r   = d / 2;
+  const gap = PHOTO_GAP * sc;
+  // bottom of photo should be (gap) above the top of the sun
+  const photoTop = cy - sunR() - gap - d;
+  photoEl.style.width  = d + 'px';
+  photoEl.style.height = d + 'px';
+  photoEl.style.left   = (cx - r) + 'px';
+  photoEl.style.top    = photoTop  + 'px';
+}
+
+/* =========================================================
+   ORBITAL RINGS (SVG)
+   ========================================================= */
+const orbitsSvg = document.getElementById('orbits-svg');
+
+function drawOrbits() {
+  orbitsSvg.innerHTML = '';
+  orbitsSvg.setAttribute('viewBox', `0 0 ${window.innerWidth} ${window.innerHeight}`);
+  PROJECTS.forEach(p => {
+    const r   = orbitR(p.baseOrbit);
+    const el  = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+    el.setAttribute('cx', cx);
+    el.setAttribute('cy', cy);
+    el.setAttribute('rx', r);
+    el.setAttribute('ry', r * 0.92); // slight vertical squish for depth
+    el.setAttribute('fill', 'none');
+    el.setAttribute('stroke', p.color);
+    el.setAttribute('stroke-width', '0.6');
+    el.setAttribute('stroke-opacity', '0.22');
+    el.setAttribute('stroke-dasharray', '4 8');
+    orbitsSvg.appendChild(el);
+  });
+}
+
+/* =========================================================
+   PLANETS
+   ========================================================= */
+const planetEls = [];
+
+function createPlanets() {
+  // Remove old
+  planetEls.forEach(el => el && el.remove());
+  planetEls.length = 0;
+
+  const container = document.getElementById('solar-container');
+  PROJECTS.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'planet';
+    el.id = 'planet-' + p.id;
+
+    const d = planetD(p.planetSize);
+    el.style.width  = d + 'px';
+    el.style.height = d + 'px';
+
+    const c1 = lighten(p.color, 50);
+    const c2 = p.color;
+    const c3 = darken(p.color, 35);
+    el.style.background = `radial-gradient(circle at 35% 35%, ${c1}, ${c2} 55%, ${c3})`;
+    el.style.boxShadow  = `0 0 ${d * .6}px ${p.color}88, 0 0 ${d * 1.2}px ${p.color}30`;
+
+    const label = document.createElement('div');
+    label.className = 'planet-label';
+    label.textContent = p.name;
+    el.appendChild(label);
+
+    el.addEventListener('click', e => { e.stopPropagation(); openPanel(p); });
+
+    container.appendChild(el);
+    planetEls.push(el);
+  });
+}
+
+function updatePlanets(time) {
+  PROJECTS.forEach((p, i) => {
+    const el = planetEls[i];
+    if (!el) return;
+    // ry = rx * 0.92 (matching the orbit ellipse)
+    const rx = orbitR(p.baseOrbit);
+    const ry = rx * 0.92;
+    const angle = p.initialAngle + time * 0.001 * p.speed * 0.4;
+    const x = cx + rx * Math.cos(angle);
+    const y = cy + ry * Math.sin(angle);
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+    // keep size in sync (needed after resize)
+    const d = planetD(p.planetSize);
+    el.style.width  = d + 'px';
+    el.style.height = d + 'px';
+  });
+}
+
+/* ─── Color helpers ───────────────────────────────────────── */
+function hexToRgb(hex) {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+function lighten(hex, a) {
+  const { r, g, b } = hexToRgb(hex);
+  return `rgb(${Math.min(255,r+a)},${Math.min(255,g+a)},${Math.min(255,b+a)})`;
+}
+function darken(hex, a) {
+  const { r, g, b } = hexToRgb(hex);
+  return `rgb(${Math.max(0,r-a)},${Math.max(0,g-a)},${Math.max(0,b-a)})`;
+}
+
+/* =========================================================
+   INFO PANEL
+   ========================================================= */
+function openPanel(p) {
+  document.getElementById('panel-color-block').style.backgroundColor = p.color;
+  document.getElementById('panel-title').textContent = p.name;
+  document.getElementById('panel-description').textContent = p.description;
+
+  const badge = document.getElementById('panel-badge');
+  badge.textContent = p.badge;
+  badge.style.background   = p.badgeBg;
+  badge.style.color        = p.badgeColor;
+  badge.style.border       = `1px solid ${p.badgeColor}55`;
+
+  const techWrap = document.getElementById('panel-tech');
+  techWrap.innerHTML = '';
+  p.tech.forEach(t => {
+    const span = document.createElement('span');
+    span.className   = 'tech-tag';
+    span.textContent = t;
+    techWrap.appendChild(span);
+  });
+
+  document.getElementById('panel-link').href   = p.link;
+  document.getElementById('panel-github').href = p.github;
+
+  document.getElementById('info-panel').classList.add('open');
+  document.getElementById('backdrop').classList.add('show');
+}
+
+function closePanel() {
+  document.getElementById('info-panel').classList.remove('open');
+  document.getElementById('backdrop').classList.remove('show');
+}
+
+/* Close panel when pressing Escape */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePanel();
+});
+
+/* =========================================================
+   ANIMATION LOOP
+   ========================================================= */
+function animate(time) {
+  drawStars(time);
+  updatePlanets(time);
+  requestAnimationFrame(animate);
+}
+
+/* =========================================================
+   INIT / RESIZE
+   ========================================================= */
+function init() {
+  recompute();
+  initStars();
+  layoutSun();
+  layoutPhoto();
+  drawOrbits();
+  createPlanets();
+}
+
+window.addEventListener('resize', init);
+window.addEventListener('orientationchange', () => setTimeout(init, 150));
+
+init();
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
